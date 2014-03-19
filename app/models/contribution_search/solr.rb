@@ -31,6 +31,18 @@ module ContributionSearch
             integer :metadata_record_id
             integer :current_status
             
+            # Temporary map for migration from ContributionStatus to RecordStatus
+            string  :status do
+              {
+                1 => :draft,
+                2 => :submitted,
+                3 => :approved,
+                4 => :rejected,
+                5 => :revised,
+                6 => :withdrawn
+              }[current_status].to_s
+            end
+            
             time    :created_at
             time    :status_timestamp
             
