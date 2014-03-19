@@ -87,6 +87,10 @@ class EuropeanaRecord < ActiveRecord::Base
       ContributionStatus::APPROVED
     end
     
+    string :status do
+      'approved'
+    end
+    
     integer :contributor_id do
       nil
     end
