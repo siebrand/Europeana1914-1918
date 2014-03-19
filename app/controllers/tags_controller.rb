@@ -84,14 +84,14 @@ class TagsController < ApplicationController
   
   # GET /:locale/contributions/:contribution_id/tags/:id/:delete(.:format)
   def delete
-    current_user.may_untag_contribution!(@tag)
+    current_user.may_untag_contribution!(@contribution, @tag)
   end
   
   # DELETE /:locale/contributions/:contribution_id/tags/:id(.:format)
   def destroy
-    current_user.may_untag_contribution!(@tag)
+    current_user.may_untag_contribution!(@contribution, @tag)
     
-    @tag.taggings.each(&:destroy)
+    @contribution.taggings.select { |tagging| tagging.tag == @tag }.each { |tagging| tagging.destroy }
     @contribution.tags(:reload => true)
     
     respond_to do |format|
