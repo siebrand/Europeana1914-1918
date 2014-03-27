@@ -15,7 +15,7 @@ module SearchHelper
     row_label ||= row_value
 
     request_params  = request.query_parameters.dup
-    facet_params    = request_params.has_key?(:qf) ? request_params[:qf].dup : []
+    facet_params    = request_params.has_key?(:qf) ? sanitize_facet_params(request_params[:qf].dup) : []
     row_param_value = "#{facet_name.to_s}:#{row_value.to_s}"
     html_options['data-value'] ||= "&qf[]=#{row_param_value}"
 
@@ -64,9 +64,21 @@ module SearchHelper
     
     facet_params = params.delete(:qf)
     facet_params.delete_at(index)
-    params[:qf] = facet_params unless facet_params.blank?
+    params[:qf] = sanitize_facet_params(facet_params) unless facet_params.blank?
     
     params
+  end
+  
+  ###
+  # Rejects any URL parameters that do not have the correct format for facets,
+  # i.e. name:value
+  #
+  # @param [Array<String>] facet_params Array of facet values
+  #
+  def sanitize_facet_params(facet_params)
+    facet_params.reject do |param|
+      param.match(/^([^:]+):(.+)$/).blank?
+    end
   end
   
   def link_to_remove_facet_row(facet_name, row_value, row_label = nil, html_options = {})
@@ -228,6 +240,8 @@ module SearchHelper
         data_val = "&q=#{query}"
       else
         facet_row_parts = filter_param[:value].match(/^([^:]+):(.+)$/)
+        next unless facet_row_parts.present?
+        
         facet_name, field_value = facet_row_parts[1], facet_row_parts[2]
         facet = facets.find { |facet| facet["name"].to_s == facet_name }
         
@@ -264,6 +278,8 @@ module SearchHelper
           data_val += '&' + previous_param[:name] + '=' + previous_param[:value]
         end
       end
+      
+      link_params[:qf] = sanitize_facet_params(link_params[:qf]) if link_params[:qf].present?
       
       filter_links << {
         :reduce => {
