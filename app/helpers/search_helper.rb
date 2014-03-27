@@ -244,6 +244,7 @@ module SearchHelper
         
         facet_name, field_value = facet_row_parts[1], facet_row_parts[2]
         facet = facets.find { |facet| facet["name"].to_s == facet_name }
+        next unless facet.present?
         
         if controller.controller_name == "collection" && facet["label"] == 'Source'
           facet["label"] = t('views.search.facets.europeana.source_label')
