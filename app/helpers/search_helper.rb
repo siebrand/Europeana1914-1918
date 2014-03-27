@@ -254,6 +254,8 @@ module SearchHelper
       filter_params[0..index].each do |previous_param|
         if previous_param[:name] == "q"
           link_params[:q] = previous_param[:value]
+        elsif previous_param[:name] == "term"
+          # Omit from URL params as term is in URL path
         else
           link_params[:qf] ||= []
           link_params[:qf] << previous_param[:value]
