@@ -114,7 +114,6 @@ module SearchHelper
       id_parts = edm['id'].split('/')
       edm['guid'] = show_europeana_url(:dataset_id => id_parts[1], :record_id => id_parts[2])
     end
-
     
     edm
   end
@@ -212,7 +211,7 @@ module SearchHelper
     end
     
     filter_links = []
-    
+
     filter_params.each_with_index do |filter_param, index|
       link_params = request.query_parameters.dup
       link_params.delete(:q)
@@ -232,12 +231,16 @@ module SearchHelper
         facet_name, field_value = facet_row_parts[1], facet_row_parts[2]
         facet = facets.find { |facet| facet["name"].to_s == facet_name }
         
-
         if controller.controller_name == "collection" && facet["label"] == 'Source'
-           facet["label"] = t('views.search.facets.europeana.source_label')
+          facet["label"] = t('views.search.facets.europeana.source_label')
         end
         
-        link_text = facet["label"] + ": " + facet["fields"].find { |field| field["search"].to_s == field_value }["label"]
+        if facet_field = facet["fields"].find { |field| field["search"].to_s == field_value }
+          link_text = facet["label"] + ": " + facet_field["label"]
+        else
+          link_text = field_value
+        end
+        
         if facet_is_single_select?(facet_name)
           remove_url = nil
         else
@@ -259,8 +262,6 @@ module SearchHelper
           data_val += '&' + previous_param[:name] + '=' + previous_param[:value]
         end
       end
-
-      
       
       filter_links << {
         :reduce => {
