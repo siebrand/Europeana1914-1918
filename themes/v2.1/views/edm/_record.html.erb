@@ -68,11 +68,15 @@
 							html += '</div>'
 						html += '</div>'
 
-					elsif readLabel = edm_proxy_field(aggregation, 'edmDataProvider')
+					else
 						html += '<div class="col-cell">'
-					    	html += '<span class="icon-external"></span>'
+								html += '<span class="icon-external"></span>'
 							html += '<div class="external-link">'
+							if readLabel = edm_proxy_field(aggregation, 'edmDataProvider')
 								html += t('formtastic.labels.content.metadata.edm.partner_site') + '<a href="' + edmIsShownAt + '" target="_blank">' + ': ' + readLabel + '</a>'
+							else
+								html += '<a href="' + edmIsShownAt + '" target="_blank">' + t('formtastic.labels.content.metadata.edm.external_partner_site') + '</a>'
+							end
 							html += '</div>'
 						html += '</div>'
 					end
