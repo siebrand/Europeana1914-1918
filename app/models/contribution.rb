@@ -334,7 +334,6 @@ class Contribution < ActiveRecord::Base
       end
       
       ::ActiveRecord::Base.connection.clear_query_cache
-      GC.start
     end
   end
   
