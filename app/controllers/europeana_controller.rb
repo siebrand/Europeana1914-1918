@@ -72,7 +72,6 @@ class EuropeanaController < ApplicationController
     @object = cached_record(record_id_from_params)
 
     respond_to do |format|
-      format.json  { render :json => { :result => 'success', :object => @object } }
       format.html do
         if params[:edmpdf] == 'true'
           render :partial => 'edm/pdf'
@@ -82,6 +81,7 @@ class EuropeanaController < ApplicationController
           render :partial => '/edm/carousel', :locals => { :record => @object }
         end
       end
+      format.json  { render :json => { :result => 'success', :object => @object } }
     end
   end
   
