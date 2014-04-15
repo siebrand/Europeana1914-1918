@@ -447,6 +447,9 @@ ro:
       flag:
         alert: 
         notice: 
+      unflag:
+        alert: 
+        notice: 
     attachments:
       create:
         alert: A aparut o problemă la salvarea fişierului ataşat
@@ -934,7 +937,7 @@ ro:
       help: Ajutor
       home: "Αcasă"
     software_engine: Pusă la dispoziție  de RunCoCo
-  locale: Engleză
+  locale: Română
   mail:
     contributions:
       published:
@@ -1201,6 +1204,8 @@ ro:
         headings:
           export: Export
         links:
+          annotations:
+            description: 
           config:
             description: Configurați setările website-ului
             text: Configurare
@@ -1239,6 +1244,8 @@ ro:
           statistics:
             description: Vizualizati statisticile aferente povestirilor de inceput
             text: Statistici
+          taggings:
+            description: 
           users:
             description: 'Manageriati conturile de utilizatori : cele de administratori, catalogatori& contributori'
             text: Conturi de utilizatori
@@ -1284,6 +1291,9 @@ ro:
         index:
           introduction: Tabelul de mai jos prezinta numarul de povestiri publicate si itemii atasati lor pentru un anumit an si optional pentru o anumita zi de colectare
           title: Statistici
+      taggings:
+        index:
+          title: 
       taxonomy_terms:
         delete:
           question: Sunteti sigur ca doriti stergerea termenului taxonomic "%{term}"?
@@ -1335,6 +1345,9 @@ ro:
       edit:
         title: Editati adnotarea
       flag:
+        question: 
+        title: 
+      unflag:
         question: 
         title: 
     attachments:

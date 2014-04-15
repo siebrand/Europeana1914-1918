@@ -462,6 +462,9 @@ it:
       flag:
         alert: 
         notice: 
+      unflag:
+        alert: 
+        notice: 
     attachments:
       create:
         alert: si è verificato un errore nel salvataggio dell'allegato
@@ -949,7 +952,7 @@ it:
       help: aiuto
       home: Home
     software_engine: Powered by RunCoCo
-  locale: inglese
+  locale: Italiano
   mail:
     contributions:
       published:
@@ -1223,6 +1226,8 @@ it:
         headings:
           export: esporta
         links:
+          annotations:
+            description: 
           config:
             description: 
             text: configurazione
@@ -1261,6 +1266,8 @@ it:
           statistics:
             description: visualizza le statistiche annuali sulle storie
             text: statistiche
+          taggings:
+            description: 
           users:
             description: 'gestisci gli account utenti: amministratori, catalogatori e contributori'
             text: account dell'utente
@@ -1306,6 +1313,9 @@ it:
         index:
           introduction: la tabella sottostante mostra il numero di storie pubblicate ed i relativi oggetti in un certo anno e, facoltativamente, in un determinato collection day
           title: statistiche
+      taggings:
+        index:
+          title: 
       taxonomy_terms:
         delete:
           question: sei sicuro di voler eliminare il termine tassonomico %{term}"?
@@ -1357,6 +1367,9 @@ it:
       edit:
         title: 
       flag:
+        question: 
+        title: 
+      unflag:
         question: 
         title: 
     attachments:
