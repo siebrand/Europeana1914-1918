@@ -13,6 +13,7 @@ module RunCoCo
   autoload :FlashSessionCookieMiddleware, 'runcoco/flash_session_cookie_middleware'
   autoload :Logger,                       'runcoco/logger'
   autoload :OEmbed,                       'runcoco/oembed'
+  autoload :XChar,                        'runcoco/xchar'
 
   class FieldNameInvalid < Exception; end # :nodoc:
   class BadRequest < Exception; end # :nodoc:
