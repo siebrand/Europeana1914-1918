@@ -6,6 +6,7 @@ gem 'acts-as-taggable-on', '2.4.1', :path => 'vendor/gems/acts-as-taggable-on-2.
 gem 'aegis', '~> 3.0.1', :git => 'https://github.com/JohnB/aegis.git', :ref => 'b1853a5'
 gem 'aws-sdk', '~> 1.34.0'
 gem 'cocaine', '~> 0.3.2'
+gem 'blacklight', '~>  5.5.1'
 gem 'bcrypt-ruby', '2.1.2', :require => 'bcrypt'
 gem 'bing_translator', '~> 4.0.0'
 gem 'dalli', '~> 2.6.4'

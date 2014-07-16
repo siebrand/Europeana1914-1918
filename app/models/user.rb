@@ -3,8 +3,14 @@
 #
 # Uses Devise for authentication and Aegis for role-based authorization.
 class User < ActiveRecord::Base
+
+  attr_accessible :email, :password, :password_confirmation if Rails::VERSION::MAJOR < 4
+  
   # ActsAsTaggableOn taggings are linked to users
   acts_as_tagger
+  
+  # Connects this user object to Blacklights Bookmarks. 
+  include Blacklight::User
 
   # Devise authentication
   devise :database_authenticatable, :recoverable, :registerable,
