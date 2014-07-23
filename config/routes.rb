@@ -1,9 +1,4 @@
 RunCoCo::Application.routes.draw do
-  
-  root :to => "catalog#index"
-
-  blacklight_for :catalog
-
   themes_for_rails
   
   # Attachments
@@ -138,6 +133,8 @@ RunCoCo::Application.routes.draw do
     # Collection search (both Contribution and EuropeanaRecord Solr indexes)
     match 'collection/search' => 'collection#search', :as => 'search_collection', :via => :get
     match 'collection/explore/:field_name/:term' => 'collection#explore', :as => 'explore_collection', :via => :get
+    
+    blacklight_for :catalog
 
     # Flickr API interface
     resource :flickr, :controller => :flickr, :only => :show do

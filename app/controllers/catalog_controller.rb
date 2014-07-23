@@ -1,9 +1,10 @@
-# -*- encoding : utf-8 -*-
-#
-class CatalogController < ApplicationController  
-
+class CatalogController < SearchController
+  include SearchHelper
+  include CollectionDaysHelper
   include Blacklight::Catalog
-
+  
+  before_filter :require_solr!
+  
   configure_blacklight do |config|
     ## Default parameters to send to solr for all search-like requests. See also SolrHelper#solr_search_params
     config.default_solr_params = { 
@@ -11,172 +12,336 @@ class CatalogController < ApplicationController
       :rows => 10 
     }
     
-    # solr path which will be added to solr base url before the other solr params.
-    #config.solr_path = 'select' 
-    
-    # items to show per page, each number in the array represent another option to choose from.
-    #config.per_page = [10,20,50,100]
-
-    ## Default parameters to send on single-document requests to Solr. These settings are the Blackligt defaults (see SolrHelper#solr_doc_params) or 
-    ## parameters included in the Blacklight-jetty document requestHandler.
-    #
-    #config.default_document_solr_params = {
-    #  :qt => 'document',
-    #  ## These are hard-coded in the blacklight 'document' requestHandler
-    #  # :fl => '*',
-    #  # :rows => 1
-    #  # :q => '{!raw f=id v=$id}' 
-    #}
-
     # solr field configuration for search results/index views
-    config.index.title_field = 'title_display'
-    config.index.display_type_field = 'format'
-
-    # solr field configuration for document/show views
-    #config.show.title_field = 'title_display'
-    #config.show.display_type_field = 'format'
-
-    # solr fields that will be treated as facets by the blacklight application
-    #   The ordering of the field names is the order of the display
-    #
-    # Setting a limit will trigger Blacklight's 'more' facet values link.
-    # * If left unset, then all facet values returned by solr will be displayed.
-    # * If set to an integer, then "f.somefield.facet.limit" will be added to
-    # solr request, with actual solr request being +1 your configured limit --
-    # you configure the number of items you actually want _displayed_ in a page.    
-    # * If set to 'true', then no additional parameters will be sent to solr,
-    # but any 'sniffed' request limit parameters will be used for paging, with
-    # paging at requested limit -1. Can sniff from facet.limit or 
-    # f.specific_field.facet.limit solr request params. This 'true' config
-    # can be used if you set limits in :default_solr_params, or as defaults
-    # on the solr side in the request handler itself. Request handler defaults
-    # sniffing requires solr requests to be made with "echoParams=all", for
-    # app code to actually have it echo'd back to see it.  
-    #
-    # :show may be set to false if you don't want the facet to be drawn in the 
-    # facet bar
-    config.add_facet_field 'format', :label => 'Format'
-    config.add_facet_field 'pub_date', :label => 'Publication Year', :single => true
-    config.add_facet_field 'subject_topic_facet', :label => 'Topic', :limit => 20 
-    config.add_facet_field 'language_facet', :label => 'Language', :limit => true 
-    config.add_facet_field 'lc_1letter_facet', :label => 'Call Number' 
-    config.add_facet_field 'subject_geo_facet', :label => 'Region' 
-    config.add_facet_field 'subject_era_facet', :label => 'Era'  
-
-    config.add_facet_field 'example_pivot_field', :label => 'Pivot Field', :pivot => ['format', 'language_facet']
-
-    config.add_facet_field 'example_query_facet_field', :label => 'Publish Date', :query => {
-       :years_5 => { :label => 'within 5 Years', :fq => "pub_date:[#{Time.now.year - 5 } TO *]" },
-       :years_10 => { :label => 'within 10 Years', :fq => "pub_date:[#{Time.now.year - 10 } TO *]" },
-       :years_25 => { :label => 'within 25 Years', :fq => "pub_date:[#{Time.now.year - 25 } TO *]" }
-    }
-
-
-    # Have BL send all facet field names to Solr, which has been the default
-    # previously. Simply remove these lines if you'd rather use Solr request
-    # handler defaults, or have no facets.
+    config.index.title_field = 'title_text'
+#    config.index.display_type_field = 'type_s'
+    
+#    config.add_facet_field 'format', :label => 'Format'
+#    config.add_facet_field 'pub_date', :label => 'Publication Year', :single => true
+#    config.add_facet_field 'subject_topic_facet', :label => 'Topic', :limit => 20
+#    config.add_facet_field 'language_facet', :label => 'Language', :limit => true
+#    config.add_facet_field 'lc_1letter_facet', :label => 'Call Number'
+#    config.add_facet_field 'subject_geo_facet', :label => 'Region'
+#    config.add_facet_field 'subject_era_facet', :label => 'Era'
+    
+    config.add_facet_field "year_sm"
+    config.add_facet_field "type_s"
+    config.add_facet_field "provider_sm"
+    config.add_facet_field "data_provider_sm"
+    config.add_facet_field "country_sm"
+    config.add_facet_field "rights_sm"
+    config.add_facet_field "uri_sm"
+    
     config.add_facet_fields_to_solr_request!
-
-    # solr fields to be displayed in the index (search results) view
-    #   The ordering of the field names is the order of the display 
-    config.add_index_field 'title_display', :label => 'Title'
-    config.add_index_field 'title_vern_display', :label => 'Title'
-    config.add_index_field 'author_display', :label => 'Author'
-    config.add_index_field 'author_vern_display', :label => 'Author'
-    config.add_index_field 'format', :label => 'Format'
-    config.add_index_field 'language_facet', :label => 'Language'
-    config.add_index_field 'published_display', :label => 'Published'
-    config.add_index_field 'published_vern_display', :label => 'Published'
-    config.add_index_field 'lc_callnum_display', :label => 'Call number'
-
-    # solr fields to be displayed in the show (single result) view
-    #   The ordering of the field names is the order of the display 
-    config.add_show_field 'title_display', :label => 'Title'
-    config.add_show_field 'title_vern_display', :label => 'Title'
-    config.add_show_field 'subtitle_display', :label => 'Subtitle'
-    config.add_show_field 'subtitle_vern_display', :label => 'Subtitle'
-    config.add_show_field 'author_display', :label => 'Author'
-    config.add_show_field 'author_vern_display', :label => 'Author'
-    config.add_show_field 'format', :label => 'Format'
-    config.add_show_field 'url_fulltext_display', :label => 'URL'
-    config.add_show_field 'url_suppl_display', :label => 'More Information'
-    config.add_show_field 'language_facet', :label => 'Language'
-    config.add_show_field 'published_display', :label => 'Published'
-    config.add_show_field 'published_vern_display', :label => 'Published'
-    config.add_show_field 'lc_callnum_display', :label => 'Call number'
-    config.add_show_field 'isbn_t', :label => 'ISBN'
-
-    # "fielded" search configuration. Used by pulldown among other places.
-    # For supported keys in hash, see rdoc for Blacklight::SearchFields
-    #
-    # Search fields will inherit the :qt solr request handler from
-    # config[:default_solr_parameters], OR can specify a different one
-    # with a :qt key/value. Below examples inherit, except for subject
-    # that specifies the same :qt as default for our own internal
-    # testing purposes.
-    #
-    # The :key is what will be used to identify this BL search field internally,
-    # as well as in URLs -- so changing it after deployment may break bookmarked
-    # urls.  A display label will be automatically calculated from the :key,
-    # or can be specified manually to be different. 
-
-    # This one uses all the defaults set by the solr request handler. Which
-    # solr request handler? The one set in config[:default_solr_parameters][:qt],
-    # since we aren't specifying it otherwise. 
     
     config.add_search_field 'all_fields', :label => 'All Fields'
+  end
+  
+  # GET /collection/search
+  def search
+    @results = []
     
-
-    # Now we see how to over-ride Solr request handler defaults, in this
-    # case for a BL "search field", which is really a dismax aggregate
-    # of Solr search fields. 
-    
-    config.add_search_field('title') do |field|
-      # solr_parameters hash are sent to Solr as ordinary url query params. 
-      field.solr_parameters = { :'spellcheck.dictionary' => 'title' }
-
-      # :solr_local_parameters will be sent using Solr LocalParams
-      # syntax, as eg {! qf=$title_qf }. This is neccesary to use
-      # Solr parameter de-referencing like $title_qf.
-      # See: http://wiki.apache.org/solr/LocalParams
-      field.solr_local_parameters = { 
-        :qf => '$title_qf',
-        :pf => '$title_pf'
-      }
+    if params[:term]
+      @term = CGI::unescape(params[:term])
+      @field = MetadataField.find_by_name!(params[:field_name])
+      if taxonomy_term = @field.taxonomy_terms.find_by_term(@term)
+        search_terms = I18n.available_locales.collect do |locale|
+          I18n.t("formtastic.labels.taxonomy_term.#{@field.name}.#{@term}", :locale => locale, :default => @term).add_quote_marks
+        end
+        search_terms = [ search_terms.uniq ]
+      end
+    else
+      @query = params[:q]
+      search_terms = @query.present? ? [ @query ] : []
     end
     
-    config.add_search_field('author') do |field|
-      field.solr_parameters = { :'spellcheck.dictionary' => 'author' }
-      field.solr_local_parameters = { 
-        :qf => '$author_qf',
-        :pf => '$author_pf'
+    if search_terms.present? || params[:term].blank?
+      count = [ (params[:count] || 12).to_i, 100 ].min # Default 12, max 100
+      count = 12 unless count > 0
+      
+      page = (params[:page] || 1).to_i
+      page = 1 unless page > 0
+      
+      pagination_params = { :page => page, :per_page => count }
+      
+      facet_params = extracted_facet_params.dup
+      
+      indices = case facet_params.delete(:index).first
+        when "a"
+          [ Contribution, EuropeanaRecord ]
+        when "c"
+          Contribution
+        when "e"
+          EuropeanaRecord
+      end
+      
+      if refine_search_terms = facet_params.delete(:q)
+        search_terms = search_terms + refine_search_terms.reject(&:blank?)
+      end
+      
+      search = Sunspot.search indices do |query|
+        facet_params.each_pair do |name, criteria|
+          query.with(name.to_sym).all_of(criteria)
+        end
+        
+        query.with :status, Contribution.published_status
+        
+        if params[:contributor_id].present?
+          query.with :contributor_id, params[:contributor_id]
+        end
+        
+        if params[:tag].present?
+          if tag = ActsAsTaggableOn::Tag.find_by_name(params[:tag])
+            query.with :tag_ids, tag.id
+          else
+            query.with :tag_ids, -1 # i.e. no results
+          end
+        end
+        
+        if indices == Contribution
+          # Contribution facets
+          MetadataField.where(:facet => true, :field_type => 'taxonomy').each do |field|
+            query.facet "metadata_#{field.name}_ids"
+          end
+          query.facet "place_name"
+        elsif indices == EuropeanaRecord
+          # EuropeanaRecord facets
+          query.facet "year"
+          query.facet "type"
+          query.facet "provider"
+          query.facet "data_provider"
+          query.facet "country"
+          query.facet "rights"
+          query.facet "uri"
+        end
+        
+        query.fulltext solr_multiple_queries(search_terms), { :minimum_match => 1 }
+        query.paginate(pagination_params.dup)
+      end
+      
+      @facets = [ index_facet ] + search.facets.collect { |facet|
+        {
+          "name" => facet.name.to_s,
+          "label" => facet_label(facet.name),
+          "fields" => facet.rows.collect { |row|
+            {
+              "label" => facet_row_label(facet.name, row.value),
+              "search" => row.value.to_s,
+              "count" => row.count
+            }
+          }
+        }
       }
+      
+      response = {
+        'facets' => @facets,
+        'items' => search.results,
+        'itemsCount' => search.results.size,
+        'totalResults' => search.total
+      }
+
+      @results = paginate_search_result_items(response, pagination_params)
     end
     
-    # Specifying a :qt only to show it's possible, and so our internal automated
-    # tests can test it. In this case it's the same as 
-    # config[:default_solr_parameters][:qt], so isn't actually neccesary. 
-    config.add_search_field('subject') do |field|
-      field.solr_parameters = { :'spellcheck.dictionary' => 'subject' }
-      field.qt = 'search'
-      field.solr_local_parameters = { 
-        :qf => '$subject_qf',
-        :pf => '$subject_pf'
-      }
+    if params.delete(:layout) == '0'
+      render :partial => 'search/results',
+        :locals => {
+          :results => @results,
+          :query => @query,
+          :term => @term
+        } and return
     end
+    
+    respond_to do |format|
+      format.html { render :template => 'search/page' }
+      format.json do
+        if response.blank?
+          json = {}.to_json
+        else
+          response['items'] = response['items'].collect { |result| search_result_to_edm(result) }
+          json = response.to_json
+        end
+        json = "#{params[:callback]}(#{json});" unless params[:callback].blank?
+        render :json => json
+      end
+    end
+  end
+  
+  # GET /collection/explore/:field_name/:term
+  def explore
+    search
+  end
+  
+private
 
-    # "sort results by" select (pulldown)
-    # label in pulldown is followed by the name of the SOLR field to sort by and
-    # whether the sort is ascending or descending (it must be asc or desc
-    # except in the relevancy case).
-    config.add_sort_field 'score desc, pub_date_sort desc, title_sort asc', :label => 'relevance'
-    config.add_sort_field 'pub_date_sort desc, title_sort asc', :label => 'year'
-    config.add_sort_field 'author_sort asc, title_sort asc', :label => 'author'
-    config.add_sort_field 'title_sort asc, pub_date_sort desc', :label => 'title'
-
-    # If there are more than this many search results, no spelling ("did you 
-    # mean") suggestion is offered.
-    config.spell_max = 5
+  ##
+  # Paginates a set of search result items for use with +will_paginate+
+  #
+  # @param [Hash] response API search response, with +items+, +itemsCount+ and
+  #   +totalResults+ keys, as returned by +#api_search+.
+  # @param [Hash] options Optional parameters
+  # @option options [String,Integer] :per_page The number of results to return.
+  #   Maximum 100; default 12.
+  # @option options [String,Integer] :page The page number of results to return.
+  #   Default 1.
+  # @return [WillPaginate::Collection] +will_paginate+ compatibile result set.
+  # @todo Is this necessary when the source is a paginated Sunspot search?
+  #
+  def paginate_search_result_items(response, options)
+    WillPaginate::Collection.create(options[:page], 
+    options[:per_page], 
+    response['totalResults']) do |pager|
+      if response['itemsCount'] == 0
+        pager.replace([])
+      else
+        pager.replace(response['items'])
+      end
+    end
+  end
+  
+  def facet_label(facet_name)
+    if taxonomy_field_facet = facet_name.to_s.match(/^metadata_(.+)_ids$/)
+      field_name = taxonomy_field_facet[1]
+    else
+      field_name = facet_name
+    end
+    
+    provider = case extracted_facet_params[:index].first
+      when "c"
+        "contributions"
+      when "e"
+        "europeana"
+    end
+    t("views.search.facets.#{provider}.#{field_name}", :default => "views.search.facets.common.#{field_name}".to_sym)
   end
 
-end 
+  def facet_row_label(facet_name, row_value)
+    @@metadata_fields ||= {}
+
+    if row_value.is_a?(Integer)
+      if taxonomy_field_facet = facet_name.to_s.match(/^metadata_(.+)_ids$/)
+        field_name = taxonomy_field_facet[1]
+        unless @@metadata_fields[field_name]
+          @@metadata_fields[field_name] = MetadataField.includes(:taxonomy_terms).find_by_name(field_name)
+        end
+        if row_term = @@metadata_fields[field_name].taxonomy_terms.select { |term| term.id == row_value }.first
+          if (field_name == 'collection_day') && (collection_day = CollectionDay.find_by_code(row_term.term))
+            row_label = collection_day_summary(collection_day)
+          else
+            row_label = row_term.term
+          end
+        end
+      end
+    elsif facet_name.to_s == 'uri'
+      row_label = openskos_concept_label(row_value)
+      wwi_uri = "http://data.europeana.eu/concept/loc/sh85148236"
+      unless wwi_uri == row_value
+        wwi_prefix = openskos_concept_label(wwi_uri)
+        row_label.sub!(/^#{wwi_prefix} -- /i, '')
+      end
+    end
+    
+    row_label || row_value.to_s
+  end
+  
+  def redirect_to_search
+    return if performed?
+    
+    index = extracted_facet_params[:index]
+
+    # Validate index:
+    # * is present
+    # * has only one value
+    # * is a known value
+    unless index.present? && (index.size == 1) && [ "a", "c", "e" ].include?(index.first)
+      facet_params = extracted_facet_params
+      facet_params[:index] = [ "a" ]
+      params[:qf] = facet_params
+      @redirect_required = true
+    end
+    
+    super
+  end
+  
+  def require_solr!
+    unless RunCoCo.configuration.search_engine == :solr
+      redirect_to search_contributions_path
+    end
+  end
+  
+  ##
+  # Constructs a pseudo-facet for the index to be searched
+  #
+  # @return [Hash]
+  # @todo Move labels into locale
+  #
+  def index_facet
+    {
+      "name" => "index",
+      "label" => "Source",
+      "fields" => [ 
+        { "search" => "a", "label" => t('views.search.facets.europeana.source_all') },
+        { "search" => "c", "label" => t('views.search.facets.europeana.source_ugc') },
+        { "search" => "e", "label" => t('views.search.facets.europeana.source_institution')}
+      ]
+    }
+  end
+  
+  # @param [String,Array] query_text Query text as entered by user, or an array
+  #   of terms.
+  # @return [String] Query string formatted to send to Solr, disjunct syntax
+  def solr_single_query(query_text)
+    translations = query_text.is_a?(String) ? bing_translate(query_text) : query_text
+    
+    search_terms = case translations
+    when Hash
+      translations.values.uniq
+    when String
+      [ translations ]
+    when Array
+      translations
+    end
+    
+    search_terms.collect! do |term|
+      solr_dismax_query_from_boolean(term)
+    end
+    
+    '(' + search_terms.join(') (') + ')'
+  end
+  
+  def solr_dismax_query_from_boolean(term)
+    term_words = term.scan(/("[^"]+"|[^ ]+)/).flatten
+    term_word_count = term_words.length
+
+    parsed_words = []
+    i = 0
+    
+    while i < term_word_count
+      this_word = term_words[i]
+      alt_word = nil
+      if (i + 1) <= (term_word_count - 2) # at least two words remain
+        next_word = term_words[i + 1]
+        if next_word == 'OR'
+          alt_word = term_words[i + 2]
+        end
+      end
+      
+      if alt_word.nil?
+        parsed_words << this_word
+        i += 1
+      else
+        parsed_words << '(' + this_word + ' ' + alt_word + ')'
+        i += 3
+      end
+    end
+
+    '+' + parsed_words.join(' +')
+  end
+  
+  # @param [Array<String>] queries Multiple query strings
+  # @return Query string formatted to send to Solr, disjunct syntax
+  def solr_multiple_queries(queries)
+    queries.collect { |q| '+(' + solr_single_query(q) + ')' }.join(' ')
+  end
+  
+end

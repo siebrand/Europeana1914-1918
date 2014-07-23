@@ -23,3 +23,4 @@
 //= require gmtplusone/readmore
 //= require gmtplusone/truncate
 //= require ./eu/europeana
+//= require blacklight/blacklight
