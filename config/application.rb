@@ -64,6 +64,7 @@ module RunCoCo
     config.assets.precompile += [
       'mediaelementplayer.js', 'pdf.js', 'pdf.worker.js',
       'annotorious.css', 'mediaelementplayer.css', 'pdf.css',
+      'blacklight.css',
       '*/javascripts/eu/europeana/pages/*.js',
       /\/stylesheets\/[^\/]*\.css\Z/,
       /\/javascripts\/[^\/]*\.js\Z/,
