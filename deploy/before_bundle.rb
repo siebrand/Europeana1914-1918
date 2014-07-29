@@ -4,6 +4,7 @@ username = config.node[:users].first[:username]
 if [ "app", "util" ].include?(config.current_role)
   [
     "#{config.shared_path}/config/initializers/action_mailer.rb",
+    "#{config.shared_path}/config/initializers/blacklight.rb",
     "#{config.shared_path}/config/initializers/devise.rb",
     "#{config.shared_path}/config/initializers/europeana.rb",
     "#{config.shared_path}/config/initializers/localeapp.rb",
