@@ -2,11 +2,9 @@
 # Likewise, all the methods added will be available for all controllers.
 class ApplicationController < ActionController::Base
   # Adds a few additional behaviors into the application controller 
-   include Blacklight::Controller
+  include Blacklight::Controller
   # Please be sure to implement current_user and user_session. Blacklight depends on 
   # these methods in order to perform user specific actions. 
-
-#  layout 'blacklight'
 
   helper :all # include all helpers, all the time
   helper_method :sphinx_running?, :current_user, :contribution_fields,

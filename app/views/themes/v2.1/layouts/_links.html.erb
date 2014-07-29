@@ -57,6 +57,10 @@
   link += '</noscript>'
 
   link += theme_javascript_include_tag 'respond'
+  
+  if controller.controller_name == 'catalog'
+    link += stylesheet_link_tag 'blacklight'
+  end
 
 %>
 <%= link.html_safe %>
