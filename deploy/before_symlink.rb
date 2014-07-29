@@ -7,9 +7,6 @@ run "ln -nfs #{config.shared_path}/config/initializers/action_mailer.rb #{config
 # Europeana API
 run "ln -nfs #{config.shared_path}/config/initializers/europeana.rb #{config.release_path}/config/initializers/europeana.rb"
 
-# Blacklight
-run "ln -nfs #{config.shared_path}/config/initializers/blacklight.rb #{config.release_path}/config/initializers/blacklight.rb"
-
 # Solr
 run "mkdir #{config.release_path}/solr"
 run "cp -r #{config.release_path}/config/solr/conf #{config.release_path}/solr"
