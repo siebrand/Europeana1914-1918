@@ -33,6 +33,7 @@ config/initializers/thinking_sphinx.rb
 config/initializers/europeana.rb
 config/initializers/search_engine.rb
 config/initializers/localeapp.rb
+config/initializers/blacklight.rb
 db/sphinx/
 db/schema.rb
 log/
