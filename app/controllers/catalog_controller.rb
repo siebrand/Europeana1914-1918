@@ -32,23 +32,14 @@ private
     
     # solr field configuration for search results/index views
     config.index.title_field = 'title_text'
-#    config.index.display_type_field = 'type_s'
-    
-#    config.add_facet_field 'format', :label => 'Format'
-#    config.add_facet_field 'pub_date', :label => 'Publication Year', :single => true
-#    config.add_facet_field 'subject_topic_facet', :label => 'Topic', :limit => 20
-#    config.add_facet_field 'language_facet', :label => 'Language', :limit => true
-#    config.add_facet_field 'lc_1letter_facet', :label => 'Call Number'
-#    config.add_facet_field 'subject_geo_facet', :label => 'Region'
-#    config.add_facet_field 'subject_era_facet', :label => 'Era'
     
     # Contribution facets
     MetadataField.where(:facet => true, :field_type => 'taxonomy').each do |field|
-      config.add_facet_field "metadata_#{field.name}_ids_im", :label => facet_label(:contributions, field.name)
+      config.add_facet_field "metadata_#{field.name}_ids_im", :label => facet_label(:contributions, field.name), :helper_method => :"catalog_metadata_#{field.name}_ids_facet_field_label"
     end
     config.add_facet_field "place_name_s", :label => facet_label(:contributions, :place_name)
     
-    config.add_facet_field "uri_sm", :label => facet_label(:europeana, :uri)
+    config.add_facet_field "uri_sm", :label => facet_label(:europeana, :uri), :helper_method => :"catalog_uri_facet_field_label"
     config.add_facet_field "year_sm", :label => facet_label(:europeana, :year)
     config.add_facet_field "type_s", :label => facet_label(:europeana, :type)
     config.add_facet_field "provider_sm", :label => facet_label(:europeana, :provider)

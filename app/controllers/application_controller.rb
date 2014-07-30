@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
   helper_method :sphinx_running?, :current_user, :contribution_fields,
     :dropbox_authorized?, :dropbox_client, :dropbox_configured?,
     :europeana_api_configured?, :flickr_configured?, :search_result_to_edm,
-    :get_http_headers
+    :get_http_headers, :openskos_concept_label
 
   protect_from_forgery # See ActionController::RequestForgeryProtection for details
 
